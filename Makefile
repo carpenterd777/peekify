@@ -5,7 +5,7 @@ CXXFLAGS := -g -std=c++2a -Wall -Werror -pedantic-errors -fmessage-length=0 -I $
 SDIR := ./src
 ODIR := $(SDIR)/obj
 LDIR := ./lib
-LIBS := -lm
+LIBS := -lcurl
 
 DEPS := $(shell find $(IDIR) -name '*.hpp')
 
@@ -17,6 +17,9 @@ $(ODIR)/%.o: $(SDIR)/%.cpp $(DEPS)
 
 all: $(OBJ)
 	$(CXX) -o peekify $^ $(CXXFLAGS) $(LIBS)
+
+install:
+	apt-get install libcurl4-openssl-dev
 
 .PHONY: clean
 
