@@ -1,3 +1,8 @@
+/**
+ * Author: carpenterd777
+ * Date: 2022-05-06
+ */
+
 #include <iostream>
 #include <cstdlib>
 #include "display.hpp"
