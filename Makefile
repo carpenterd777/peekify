@@ -1,9 +1,24 @@
+IDIR     := ./include
 CXX      := g++
-CXX_FILE := $(wildcard *.cpp)
-TARGET   := main
-CXXFLAGS := -g -std=c++2a -Wall -Werror -pedantic-errors -fmessage-length=0
+CXXFLAGS := -g -std=c++2a -Wall -Werror -pedantic-errors -fmessage-length=0 -I $(IDIR)
 
-all:
-	$(CXX) $(CXXFLAGS) $(CXX_FILE) -o $(TARGET)
+SDIR := ./src
+ODIR := $(SDIR)/obj
+LDIR := ./lib
+LIBS := -lm
+
+DEPS := $(shell find $(IDIR) -name '*.hpp')
+
+_OBJ := $(shell find $(SDIR) -name '*.cpp') 
+OBJ  := $(patsubst $(SDIR)/%.cpp,$(ODIR)/%.o,$(_OBJ))
+
+$(ODIR)/%.o: $(SDIR)/%.cpp $(DEPS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
+
+all: $(OBJ)
+	$(CXX) -o peekify $^ $(CXXFLAGS) $(LIBS)
+
+.PHONY: clean
+
 clean:
-	rm -f $(TARGET) $(TARGET).exe
+	rm -f $(ODIR)/*.o *~ core $(IDIR)/*~
