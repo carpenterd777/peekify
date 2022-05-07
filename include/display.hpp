@@ -25,4 +25,9 @@ namespace peekify
      * @param li information about the song to display
      */
     void render_frame(listening_info li);
+
+    /**
+     * Clears the screen.
+     */
+    void clear_screen();
 }
