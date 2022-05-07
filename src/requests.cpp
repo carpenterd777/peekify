@@ -24,7 +24,43 @@ typedef struct bufchunk
 
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *userdata);
 
-char *peekify::request()
+char *peekify::request(CURL *easyhandle)
+{
+    // place errors in an error buffer to print on an error
+    char error[CURL_ERROR_SIZE];
+    curl_easy_setopt(easyhandle, CURLOPT_ERRORBUFFER, error);
+
+    bufchunk chunk = {0};
+    curl_easy_setopt(easyhandle, CURLOPT_WRITEDATA, (void *)&chunk);
+
+    // perform the request
+    error[0] = 0; // zero the buffer before the request
+    CURLcode success = curl_easy_perform(easyhandle);
+    if (success != CURLE_OK)
+    {
+        cerr << "Error: request failed - ";
+        if (strlen(error))
+        {
+            cerr << error << " (" << success << ")" << '\n';
+        }
+        else
+        {
+
+            cerr << curl_easy_strerror(success) << " (" << success << ")" << '\n';
+        }
+        curl_easy_cleanup(easyhandle);
+        exit(EXIT_FAILURE);
+    }
+
+    return chunk.response;
+}
+
+json peekify::request_json(CURL *easyhandle)
+{
+    return json::parse(request(easyhandle));
+}
+
+void peekify::setopts(CURL *easyhandle)
 {
     // set up the auth header
     char *spotify_token = getenv("SPOTIFY_AUTH_TOKEN");
@@ -38,14 +74,6 @@ char *peekify::request()
     char *auth = (char *)malloc(prefix.length() + strlen(spotify_token));
     strncat(auth, prefix.c_str(), prefix.length());
     strncat(auth, spotify_token, strlen(spotify_token));
-
-    // create a handle for the "easy" interface, which is synchronous and blocking
-    // handles are a logical entity for the upcoming transfers
-    CURL *easyhandle = curl_easy_init();
-
-    // place errors in an error buffer to print on an error
-    char error[CURL_ERROR_SIZE];
-    curl_easy_setopt(easyhandle, CURLOPT_ERRORBUFFER, error);
 
     // set the url to download from
     curl_easy_setopt(easyhandle, CURLOPT_URL, "https://api.spotify.com/v1/me/player");
@@ -66,40 +94,9 @@ char *peekify::request()
     // do a GET request
     curl_easy_setopt(easyhandle, CURLOPT_HTTPGET, 1L);
 
-    bufchunk chunk = {0};
-    curl_easy_setopt(easyhandle, CURLOPT_WRITEDATA, (void *)&chunk);
-
-    // perform the request
-    error[0] = 0; // zero the buffer before the request
-    CURLcode success = curl_easy_perform(easyhandle);
-    if (success != CURLE_OK)
-    {
-        cerr << "Error: request failed - ";
-        if (strlen(error))
-        {
-            cerr << error << '\n';
-        }
-        else
-        {
-
-            cerr << curl_easy_strerror(success) << " (" << success << ")" << '\n';
-        }
-        curl_slist_free_all(list);
-        curl_easy_cleanup(easyhandle);
-        delete auth;
-        exit(EXIT_FAILURE);
-    }
-
     // Cleanup
-    curl_easy_cleanup(easyhandle);
     curl_slist_free_all(list);
     delete auth;
-
-    return chunk.response;
-}
-
-json peekify::request_json() {
-    return json::parse(request());
 }
 
 /**
