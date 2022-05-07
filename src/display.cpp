@@ -8,7 +8,7 @@
 using namespace std;
 using namespace peekify;
 
-void Display::render()
+void peekify::render_frame(listening_info li)
 {
     cout << "Implement"
          << "\n";
