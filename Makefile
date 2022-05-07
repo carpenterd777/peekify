@@ -24,4 +24,4 @@ install:
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o *~ core $(IDIR)/*~
+	rm -f $(ODIR)/*.o *~ core $(IDIR)/*~ peekify
