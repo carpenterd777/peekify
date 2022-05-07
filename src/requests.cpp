@@ -10,9 +10,11 @@
 #include <cstdlib>
 #include <iostream>
 #include <curl/curl.h>
+#include "json.hpp"
 #include "requests.hpp"
 
 using namespace std;
+using json = nlohmann::json;
 
 typedef struct bufchunk
 {
@@ -94,6 +96,10 @@ char *peekify::request()
     delete auth;
 
     return chunk.response;
+}
+
+json peekify::request_json() {
+    return json::parse(request());
 }
 
 /**
