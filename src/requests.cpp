@@ -22,6 +22,9 @@ typedef struct bufchunk
     size_t size;
 } bufchunk;
 
+    
+static struct curl_slist *list = NULL;
+
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *userdata);
 
 char *peekify::request(CURL *easyhandle)
@@ -29,6 +32,9 @@ char *peekify::request(CURL *easyhandle)
     // place errors in an error buffer to print on an error
     char error[CURL_ERROR_SIZE];
     curl_easy_setopt(easyhandle, CURLOPT_ERRORBUFFER, error);
+
+    // send all data to the write_data function
+    curl_easy_setopt(easyhandle, CURLOPT_WRITEFUNCTION, write_data);
 
     bufchunk chunk = {0};
     curl_easy_setopt(easyhandle, CURLOPT_WRITEDATA, (void *)&chunk);
@@ -78,14 +84,10 @@ void peekify::setopts(CURL *easyhandle)
     // set the url to download from
     curl_easy_setopt(easyhandle, CURLOPT_URL, "https://api.spotify.com/v1/me/player");
 
-    // send all data to the write_data function
-    curl_easy_setopt(easyhandle, CURLOPT_WRITEFUNCTION, write_data);
-
     // no progress bar
     curl_easy_setopt(easyhandle, CURLOPT_NOPROGRESS, 1L);
 
     // set up the headers
-    struct curl_slist *list = NULL;
     list = curl_slist_append(list, "Accept: application/json");
     list = curl_slist_append(list, "Content-Type: application/json");
     list = curl_slist_append(list, auth);
@@ -95,8 +97,12 @@ void peekify::setopts(CURL *easyhandle)
     curl_easy_setopt(easyhandle, CURLOPT_HTTPGET, 1L);
 
     // Cleanup
-    curl_slist_free_all(list);
     delete auth;
+}
+
+void peekify::requests_cleanup()
+{
+    curl_slist_free_all(list);
 }
 
 /**

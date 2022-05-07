@@ -28,4 +28,9 @@ namespace peekify
      * @param easyhandle a cURL "easy api" handle 
      */
     void setopts(CURL *easyhandle);
+
+    /**
+     * Clean up the HTTP headers.
+     */
+    void requests_cleanup();
 }
