@@ -1,6 +1,6 @@
 # peekify
 
-A small command line program to check the currently playing song on your Spotify account.
+A toy command line program to check the currently playing song on your Spotify account.
 
 ## Building
 
